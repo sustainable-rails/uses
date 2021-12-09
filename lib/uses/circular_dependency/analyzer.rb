@@ -30,14 +30,14 @@ module Uses
     private
 
       def transitive_dependency?(klass_with_uses,klass_being_analyzed, path=[])
-        other_class_is_active_service = klass_being_analyzed.respond_to?(:__active_service_dependent_classes)
+        other_class_has_uses = klass_being_analyzed.respond_to?(:__uses_dependent_classes)
 
-        if other_class_is_active_service
+        if other_class_has_uses
           if klass_with_uses == klass_being_analyzed
             [ true, path ]
           else
             # Want to stop searching as soon as we find something
-            procs_to_check_for_transitive_dependencies = klass_being_analyzed.__active_service_dependent_classes.keys.map { |klass|
+            procs_to_check_for_transitive_dependencies = klass_being_analyzed.__uses_dependent_classes.keys.map { |klass|
               ->() { transitive_dependency?(klass_with_uses,klass, path + [ klass_being_analyzed ]) }
             }
             first_proc_to_find_a_dependency = procs_to_check_for_transitive_dependencies.detect { |p|

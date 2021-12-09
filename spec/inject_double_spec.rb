@@ -1,5 +1,5 @@
 require "spec_helper"
-require "uses/service"
+require "uses/method"
 require "uses/inject_double"
 
 RSpec.describe Uses::InjectDouble do
@@ -9,7 +9,7 @@ RSpec.describe Uses::InjectDouble do
       context "using default naming" do
         it "injects the given instance" do
           InjectDoubleClass1 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           InjectDoubleClass2 = Class.new
 
@@ -28,7 +28,7 @@ RSpec.describe Uses::InjectDouble do
       context "using overridden name via as:" do
         it "injects the given instance" do
           InjectDoubleClass3 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           InjectDoubleClass4 = Class.new
 
@@ -47,7 +47,7 @@ RSpec.describe Uses::InjectDouble do
       context "using hash syntax accidentally" do
         it "raises an error" do
           InjectDoubleClass7 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           InjectDoubleClass8 = Class.new
 
@@ -64,7 +64,7 @@ RSpec.describe Uses::InjectDouble do
     context "class does not depend on the double's class" do
       it "raises an error" do
         InjectDoubleClass5 = Class.new do
-          include Uses::Service
+          include Uses::Method
         end
         InjectDoubleClass6 = Class.new
 
@@ -77,18 +77,18 @@ RSpec.describe Uses::InjectDouble do
         }.to raise_error(/does not.*InjectDoubleClass6/i)
       end
     end
-    context "class is not an active service" do
+    context "class does not use uses" do
       it "raises an error" do
         expect {
           inject_double("foo", Object => "blah")
-        }.to raise_error(/String.*does not include Uses::Service/i)
+        }.to raise_error(/String.*does not include Uses::Method/i)
       end
     end
   end
   describe "#inject_rspec_double" do
     it "injects an instance_double" do
       InjectRSpecDoubleClass1 = Class.new do
-        include Uses::Service
+        include Uses::Method
       end
       InjectRSpecDoubleClass2 = Class.new
 

@@ -20,12 +20,12 @@ module Uses
       klass    = injections.first[0]
       instance = injections.first[1]
 
-      subject_must_be_active_sevice!(subject)
+      subject_must_use_uses!(subject)
       injected_class_must_be_class!(klass)
 
       name = dependency_method_name!(subject, klass)
 
-      subject.__active_service_dependent_instances[name] = instance
+      subject.__uses_dependent_instances[name] = instance
 
       instance
     end
@@ -51,9 +51,9 @@ module Uses
 
   private
 
-    def subject_must_be_active_sevice!(subject)
-      if !subject.class.respond_to?(:__active_service_dependent_classes)
-        raise Uses::Error, "#{subject.class} does not include Uses::Service, so you cannot inject a double into it"
+    def subject_must_use_uses!(subject)
+      if !subject.class.respond_to?(:__uses_dependent_classes)
+        raise Uses::Error, "#{subject.class} does not include Uses::Method, so you cannot inject a double into it"
       end
     end
 
@@ -64,7 +64,7 @@ module Uses
     end
 
     def dependency_method_name!(subject, klass)
-      name = subject.class.__active_service_dependent_classes[klass].to_s
+      name = subject.class.__uses_dependent_classes[klass].to_s
 
       if name.blank?
         raise Uses::Error, "#{subject.class} does not depend on a #{klass}, so there is no reason to inject a mock"

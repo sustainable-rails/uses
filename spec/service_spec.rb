@@ -1,7 +1,7 @@
 require "spec_helper"
-require "uses/service"
+require "uses/method"
 
-RSpec.describe Uses::Service do
+RSpec.describe Uses::Method do
   class SomeService
     attr_reader :initializer_value
     def initialize(initializer_value: :default)
@@ -17,15 +17,15 @@ RSpec.describe Uses::Service do
   end
 
   class ServiceUsingUsesInDefaultWay
-    include Uses::Service
+    include Uses::Method
 
     uses SomeService
   end
   before do
-    Uses::Service.initializers do |initializers|
+    Uses::Method.initializers do |initializers|
       initializers.clear
     end
-    Uses::Service.config do |config|
+    Uses::Method.config do |config|
       config.reset!
     end
   end
@@ -48,7 +48,7 @@ RSpec.describe Uses::Service do
       it "raises an error if the class name cannot be used to derive the method name" do
         expect {
           Class.new do
-            include Uses::Service
+            include Uses::Method
 
             uses Class.new
           end
@@ -58,7 +58,7 @@ RSpec.describe Uses::Service do
     context "using as: to configure the method name" do
       it "creates a private method named based on `as:` that returns a memoized instance of the given class by calling .new" do
         klass = Class.new do
-          include Uses::Service
+          include Uses::Method
 
           uses SomeService, as: :the_service
         end
@@ -78,7 +78,7 @@ RSpec.describe Uses::Service do
       context "::new accepts arguments, but a no-arg invocation is valid" do
         it "invokes with no-args" do
           service = Class.new do
-            include Uses::Service
+            include Uses::Method
             uses SomeService # see its constructor
           end.new
 
@@ -96,7 +96,7 @@ RSpec.describe Uses::Service do
         it "raises an error" do
           expect {
             Class.new do
-              include Uses::Service
+              include Uses::Method
 
               uses SomeServiceWithAComplexInitialzer
             end
@@ -107,7 +107,7 @@ RSpec.describe Uses::Service do
     context "specifying a Proc to initialize:" do
       it "calls that proc to get a new memoized instance" do
         service = Class.new do
-          include Uses::Service
+          include Uses::Method
 
           uses SomeServiceWithAComplexInitialzer, as: :dep, initialize: ->(*) {
             SomeServiceWithAComplexInitialzer.new(initializer_value: "foobar")
@@ -120,14 +120,14 @@ RSpec.describe Uses::Service do
       context "a proc has been placed in the initializers map" do
         it "calls that proc to get a new memoized instance" do
 
-          Uses::Service.initializers do |initializers|
+          Uses::Method.initializers do |initializers|
             initializers[SomeServiceWithAComplexInitialzer] = ->(*) {
               SomeServiceWithAComplexInitialzer.new(initializer_value: "foobar")
             }
           end
 
           service = Class.new do
-            include Uses::Service
+            include Uses::Method
 
             uses SomeServiceWithAComplexInitialzer, as: :dep, initialize: :config_initializers
           end.new
@@ -138,12 +138,12 @@ RSpec.describe Uses::Service do
       context "a proc has not been placed in the initializers map" do
         it "raises an error" do
           confidence_check do
-            expect(Uses::Service.initializers[SomeServiceWithAComplexInitialzer]).to be_nil
+            expect(Uses::Method.initializers[SomeServiceWithAComplexInitialzer]).to be_nil
           end
 
           expect {
             Class.new do
-              include Uses::Service
+              include Uses::Method
 
               uses SomeServiceWithAComplexInitialzer, as: :dep, initialize: :config_initializers
             end
@@ -155,7 +155,7 @@ RSpec.describe Uses::Service do
       it "raises an error with that symbol in it" do
         expect {
           Class.new do
-            include Uses::Service
+            include Uses::Method
 
             uses SomeServiceWithAComplexInitialzer, as: :dep, initialize: :foobar
           end
@@ -166,7 +166,7 @@ RSpec.describe Uses::Service do
       it "raises an error with that class' name in it" do
         expect {
           Class.new do
-            include Uses::Service
+            include Uses::Method
 
             uses SomeServiceWithAComplexInitialzer, as: :dep, initialize: "blah"
           end
@@ -182,10 +182,10 @@ RSpec.describe Uses::Service do
       context "circular dependency warnings are in their default state - :warn" do
         it "works and logs a warning" do
           Class1 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           Class2 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
 
           Class1.uses Class2
@@ -195,16 +195,16 @@ RSpec.describe Uses::Service do
         end
         it "detects a transitive complex dependency" do
           Class3 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           Class4 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           Class5 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           Class6 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
 
           Class3.uses Class4
@@ -217,15 +217,15 @@ RSpec.describe Uses::Service do
       end
       context "circular dependency warnings are set to :raise_error" do
         it "raises an error" do
-          Uses::Service.config do |config|
+          Uses::Method.config do |config|
             config.on_circular_dependency = :raise_error
           end
           expect {
             Class7 = Class.new do
-              include Uses::Service
+              include Uses::Method
             end
             Class8 = Class.new do
-              include Uses::Service
+              include Uses::Method
             end
 
             Class7.uses Class8
@@ -235,14 +235,14 @@ RSpec.describe Uses::Service do
       end
       context "circular dependency warnings are disabled globally" do
         it "works and logs a debug" do
-          Uses::Service.config do |config|
+          Uses::Method.config do |config|
             config.on_circular_dependency = :ignore
           end
           Class9 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
           Class10 = Class.new do
-            include Uses::Service
+            include Uses::Method
           end
 
           Class9.uses Class10

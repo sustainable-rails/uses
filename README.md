@@ -107,14 +107,14 @@ By declaring dependencies like this, you:
 
 ## Set Up
 
-Strictly speaking, to access `uses`, you should include `Uses::Service` into any class that needs it. Practically, this is what you should
+Strictly speaking, to access `uses`, you should include `Uses::Method` into any class that needs it. Practically, this is what you should
 do:
 
 * Add it to `ApplicationController`:
 
   ```ruby
   class ApplicationController < ActionController::Base
-    include Uses::Service
+    include Uses::Method
 
     # whatever else is in your ApplicationController
   end
@@ -123,12 +123,12 @@ do:
 
   ```ruby
   class ApplicationService
-    include Uses::Service
+    include Uses::Method
   end
   ```
 
   and have your service layer classes inherit from this
-* Add `Uses::Service` to any other base class where your service layer logic is initiated.
+* Add `Uses::Method` to any other base class where your service layer logic is initiated.
 
 ## Testing Support
 
@@ -284,7 +284,7 @@ Not all objects can be created with `.new`. Here are the possible values for `in
 
   ```ruby
   # config/initializers/braintree.rb
-  Uses::Service.initializers do |initializers|
+  Uses::Method.initializers do |initializers|
     initializers[Braintree::Gateway] = ->(*) {
       Braintree::Gateway.new(
         :environment => :sandbox,

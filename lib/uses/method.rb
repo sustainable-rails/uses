@@ -15,14 +15,14 @@ module Uses
   #
   #     # app/services/application_service.rb
   #     class ApplicationService
-  #       include Uses::Service
+  #       include Uses::Method
   #     end
   #
   # Then, all services inherit from this and have access to the uses method.
   #
   # Note that any class or method without RubyDoc should be treated as private/internal, and you
   # should not depend on.
-  module Service
+  module Method
 
     # Yields a hash of initializer, with the intention that you insert
     # the initializer for your service into this hash. The key should be the class name
@@ -34,7 +34,7 @@ module Uses
     #
     #
     #    require "uses"
-    #    Uses::Service.initializers do |initializers|
+    #    Uses::Method.initializers do |initializers|
     #      initializers[Aws::S3::Client] = ->(*) {
     #        Aws::S3::Client.new(
     #          access_key_id: ENV["AWS_ACCESS_KEY_ID"],
@@ -47,7 +47,7 @@ module Uses
     #    # Then, in a service that uses this:
     #
     #    class MyService
-    #      include Uses::Service
+    #      include Uses::Method
     #
     #      uses Aws::S3::Client, as: :s3, initialize: :config_initializers
     #
@@ -72,7 +72,7 @@ module Uses
     extend ActiveSupport::Concern
 
     class_methods do
-      # Declare that the class including the Uses::Service module depends on another
+      # Declare that the class including the Uses::Method module depends on another
       # class.  This will create an instance method on this class that returns a memoized
       # instance of the class passed in (klass).
       #
@@ -99,7 +99,7 @@ module Uses
           klass_with_uses: self,
           method_name_override: as,
           initializer_strategy: initialize,
-          uses_config: Uses::Service.config
+          uses_config: Uses::Method.config
         )
 
         name                         = Uses::MethodName.new(uses_method_args)
@@ -112,21 +112,21 @@ module Uses
           circular_dependency_analyzer.notify!
         end
 
-        self.__active_service_dependent_classes[klass] = name
+        self.__uses_dependent_classes[klass] = name
 
         define_method name.to_s do
-          self.__active_service_dependent_instances[name.to_s] ||= initializer.()
+          self.__uses_dependent_instances[name.to_s] ||= initializer.()
         end
         private name.to_s
       end
 
-      def __active_service_dependent_classes
-        @__active_service_dependent_classes ||= {}
+      def __uses_dependent_classes
+        @__uses_dependent_classes ||= {}
       end
     end
 
-    def __active_service_dependent_instances
-      @__active_service_dependent_instances ||= {}
+    def __uses_dependent_instances
+      @__uses_dependent_instances ||= {}
     end
   end
 end
