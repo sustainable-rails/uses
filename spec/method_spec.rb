@@ -1,5 +1,5 @@
 require "spec_helper"
-require "uses/method"
+require "uses"
 
 RSpec.describe Uses::Method do
   class SomeService
@@ -22,10 +22,10 @@ RSpec.describe Uses::Method do
     uses SomeService
   end
   before do
-    Uses::Method.initializers do |initializers|
+    Uses.initializers do |initializers|
       initializers.clear
     end
-    Uses::Method.config do |config|
+    Uses.config do |config|
       config.reset!
     end
   end
@@ -120,7 +120,7 @@ RSpec.describe Uses::Method do
       context "a proc has been placed in the initializers map" do
         it "calls that proc to get a new memoized instance" do
 
-          Uses::Method.initializers do |initializers|
+          Uses.initializers do |initializers|
             initializers[SomeServiceWithAComplexInitialzer] = ->(*) {
               SomeServiceWithAComplexInitialzer.new(initializer_value: "foobar")
             }
@@ -138,7 +138,7 @@ RSpec.describe Uses::Method do
       context "a proc has not been placed in the initializers map" do
         it "raises an error" do
           confidence_check do
-            expect(Uses::Method.initializers[SomeServiceWithAComplexInitialzer]).to be_nil
+            expect(Uses.initializers[SomeServiceWithAComplexInitialzer]).to be_nil
           end
 
           expect {
@@ -217,7 +217,7 @@ RSpec.describe Uses::Method do
       end
       context "circular dependency warnings are set to :raise_error" do
         it "raises an error" do
-          Uses::Method.config do |config|
+          Uses.config do |config|
             config.on_circular_dependency = :raise_error
           end
           expect {
@@ -235,7 +235,7 @@ RSpec.describe Uses::Method do
       end
       context "circular dependency warnings are disabled globally" do
         it "works and logs a debug" do
-          Uses::Method.config do |config|
+          Uses.config do |config|
             config.on_circular_dependency = :ignore
           end
           Class9 = Class.new do

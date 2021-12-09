@@ -284,7 +284,7 @@ Not all objects can be created with `.new`. Here are the possible values for `in
 
   ```ruby
   # config/initializers/braintree.rb
-  Uses::Method.initializers do |initializers|
+  Uses.initializers do |initializers|
     initializers[Braintree::Gateway] = ->(*) {
       Braintree::Gateway.new(
         :environment => :sandbox,
