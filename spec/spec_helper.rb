@@ -1,4 +1,21 @@
+require "logger"
+require "confidence_check/for_rspec"
+
+if !defined?(Rails)
+  module Rails
+  end
+end
+
+if !Rails.respond_to?(:logger)
+  module Rails
+    def self.logger
+      @logger ||= Logger.new(STDERR)
+    end
+  end
+end
+
 RSpec.configure do |config|
+  config.include ConfidenceCheck::ForRSpec
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
