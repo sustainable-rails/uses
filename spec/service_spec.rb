@@ -193,29 +193,12 @@ RSpec.describe ActiveService::Service do
 
           expect(Rails.logger).to have_received(:warn).with(/Class1.*Class2.*have a circular dependency/)
         end
-      end
-      context "circular dependency warnings are set to :raise_error" do
-        it "raises an error" do
-          ActiveService::Service.config do |config|
-            config.on_circular_dependency = :raise_error
+        it "detects a transitive complex dependency" do
+          Class3 = Class.new do
+            include ActiveService::Service
           end
-          expect {
-            Class3 = Class.new do
-              include ActiveService::Service
-            end
-            Class4 = Class.new do
-              include ActiveService::Service
-            end
-
-            Class3.uses Class4
-            Class4.uses Class3
-          }.to raise_error(/Class3.*Class4.*have a circular dependency/)
-        end
-      end
-      context "circular dependency warnings are disabled globally" do
-        it "works and logs a debug" do
-          ActiveService::Service.config do |config|
-            config.on_circular_dependency = :ignore
+          Class4 = Class.new do
+            include ActiveService::Service
           end
           Class5 = Class.new do
             include ActiveService::Service
@@ -224,10 +207,48 @@ RSpec.describe ActiveService::Service do
             include ActiveService::Service
           end
 
+          Class3.uses Class4
+          Class4.uses Class5
           Class5.uses Class6
-          Class6.uses Class5
+          Class6.uses Class3
 
-          expect(Rails.logger).to have_received(:debug).with(/Class5.*Class6.*have a circular dependency/)
+          expect(Rails.logger).to have_received(:warn).with(/Class3.*Class6.*have a circular dependency.*Class4.*Class5/)
+        end
+      end
+      context "circular dependency warnings are set to :raise_error" do
+        it "raises an error" do
+          ActiveService::Service.config do |config|
+            config.on_circular_dependency = :raise_error
+          end
+          expect {
+            Class7 = Class.new do
+              include ActiveService::Service
+            end
+            Class8 = Class.new do
+              include ActiveService::Service
+            end
+
+            Class7.uses Class8
+            Class8.uses Class7
+          }.to raise_error(/Class7.*Class8.*have a circular dependency/)
+        end
+      end
+      context "circular dependency warnings are disabled globally" do
+        it "works and logs a debug" do
+          ActiveService::Service.config do |config|
+            config.on_circular_dependency = :ignore
+          end
+          Class9 = Class.new do
+            include ActiveService::Service
+          end
+          Class10 = Class.new do
+            include ActiveService::Service
+          end
+
+          Class9.uses Class10
+          Class10.uses Class9
+
+          expect(Rails.logger).to have_received(:debug).with(/Class9.*Class10.*have a circular dependency/)
           expect(Rails.logger).not_to have_received(:warn)
         end
       end

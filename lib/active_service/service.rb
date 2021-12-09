@@ -106,11 +106,13 @@ module ActiveService
         circular_dependency_analyzer = ActiveService::CircularDependency::Analyzer.new(uses_method_args)
         initializer                  = ActiveService::Initializer.from_args(uses_method_args)
 
+        circular_dependency_analyzer.analyze!
+
         if circular_dependency_analyzer.circular_dependency?
           circular_dependency_analyzer.notify!
         end
 
-        self.__active_service_dependent_classes << klass
+        self.__active_service_dependent_classes[klass] = name
 
         define_method name.to_s do
           self.__active_service_dependent_instances[name.to_s] ||= initializer.()
@@ -119,7 +121,7 @@ module ActiveService
       end
 
       def __active_service_dependent_classes
-        @__active_service_dependent_classes ||= []
+        @__active_service_dependent_classes ||= {}
       end
     end
 
