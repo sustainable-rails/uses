@@ -2,7 +2,7 @@ require_relative "log_notifier"
 require_relative "ignore_notifier"
 require_relative "raise_error_notifier"
 
-module ActiveService
+module Uses
   module CircularDependency
     class Analyzer
       def initialize(uses_method_args)
@@ -19,10 +19,10 @@ module ActiveService
 
       def notify!
         raise "You have not called analyze!" if @dependency.nil?
-        notifier = case @uses_method_args.active_service_config.on_circular_dependency
-                   when :warn        then ActiveService::CircularDependency::LogNotifer.new(@uses_method_args, @path_to_dependency)
-                   when :ignore      then ActiveService::CircularDependency::IgnoreNotifier.new(@uses_method_args, @path_to_dependency)
-                   when :raise_error then ActiveService::CircularDependency::RaiseErrorNotifier.new(@uses_method_args, @path_to_dependency)
+        notifier = case @uses_method_args.uses_config.on_circular_dependency
+                   when :warn        then Uses::CircularDependency::LogNotifer.new(@uses_method_args, @path_to_dependency)
+                   when :ignore      then Uses::CircularDependency::IgnoreNotifier.new(@uses_method_args, @path_to_dependency)
+                   when :raise_error then Uses::CircularDependency::RaiseErrorNotifier.new(@uses_method_args, @path_to_dependency)
                    end
         notifier.notify!
       end

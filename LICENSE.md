@@ -1,4 +1,4 @@
-[active_service] Copyright (2021) (David Copeland)(“Licensor”)
+[uses] Copyright (2021) (David Copeland)(“Licensor”)
 
 Hippocratic License Version Number: 2.1.
 

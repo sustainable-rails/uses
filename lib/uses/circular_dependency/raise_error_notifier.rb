@@ -1,10 +1,10 @@
 require_relative "base_notifier"
 require_relative "error"
-module ActiveService
+module Uses
   module CircularDependency
     class RaiseErrorNotifier < BaseNotifier
       def notify!
-        raise ActiveService::CircularDependency::Error.new(@message)
+        raise Uses::CircularDependency::Error.new(@message)
       end
     end
   end

@@ -1,5 +1,5 @@
 require "active_support/core_ext/object/inclusion"
-module ActiveService
+module Uses
   class Config
     # Configure what should happen when a circular dependency is detected.
     #
@@ -10,7 +10,7 @@ module ActiveService
     attr_reader :on_circular_dependency
 
     # The array of custom initializers.  Generally you should use
-    # `ActiveService.initializers do |initializers|` to manipulate this
+    # `Uses.initializers do |initializers|` to manipulate this
     attr_reader :initializers
 
     def initialize

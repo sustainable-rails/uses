@@ -1,4 +1,4 @@
-module ActiveService
+module Uses
   module CircularDependency
     class BaseNotifier
       def initialize(uses_method_args, path_to_dependency)

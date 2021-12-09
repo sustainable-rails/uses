@@ -1,4 +1,4 @@
-module ActiveService
+module Uses
   module Initializer
     class BaseInitializer
       def initialize(uses_method_args)

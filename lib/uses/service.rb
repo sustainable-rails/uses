@@ -7,7 +7,7 @@ require_relative "initializer"
 require_relative "uses_method_args"
 require_relative "circular_dependency/analyzer"
 
-module ActiveService
+module Uses
   # Provides a very basic mechanism for dependency management between classes in your service
   # layer.  This is done via the method `uses`.
   #
@@ -15,7 +15,7 @@ module ActiveService
   #
   #     # app/services/application_service.rb
   #     class ApplicationService
-  #       include ActiveService::Service
+  #       include Uses::Service
   #     end
   #
   # Then, all services inherit from this and have access to the uses method.
@@ -33,8 +33,8 @@ module ActiveService
     # new without arguments.  For example:
     #
     #
-    #    require "active_service"
-    #    ActiveService::Service.initializers do |initializers|
+    #    require "uses"
+    #    Uses::Service.initializers do |initializers|
     #      initializers[Aws::S3::Client] = ->(*) {
     #        Aws::S3::Client.new(
     #          access_key_id: ENV["AWS_ACCESS_KEY_ID"],
@@ -47,7 +47,7 @@ module ActiveService
     #    # Then, in a service that uses this:
     #
     #    class MyService
-    #      include ActiveService::Service
+    #      include Uses::Service
     #
     #      uses Aws::S3::Client, as: :s3, initialize: :config_initializers
     #
@@ -60,11 +60,11 @@ module ActiveService
       config.initializers
     end
 
-    # Yields the ActiveService::Config instance governing this
+    # Yields the Uses::Config instance governing this
     # gem's behavior.  You should call this in an intializer.
-    # See ActiveService::Config for what options exist
+    # See Uses::Config for what options exist
     def self.config
-      @@config ||= ActiveService::Config.new
+      @@config ||= Uses::Config.new
       yield(@@config) if block_given?
       @@config
     end
@@ -72,14 +72,14 @@ module ActiveService
     extend ActiveSupport::Concern
 
     class_methods do
-      # Declare that the class including the ActiveService::Service module depends on another
+      # Declare that the class including the Uses::Service module depends on another
       # class.  This will create an instance method on this class that returns a memoized
       # instance of the class passed in (klass).
       #
       # klass:: the class of what is dependend-upon.
       # as:: if given, overrides the default naming for the instance method.
       #      By default (when as: is omitted or set to nil), the name will
-      #      be `klass.underscore.gsub(/\//,"_")` (see ActiveService::MethodName),
+      #      be `klass.underscore.gsub(/\//,"_")` (see Uses::MethodName),
       #      so for a class named SomeClass, it would be `some_class`, however for
       #      a class named SomeNamespace::SomeClass, it would be `some_namespace_some_class`.
       #      If you set a value for `as:` that value would be used instead of this auto-generated value.
@@ -94,17 +94,17 @@ module ActiveService
       #                      how to iniltialize its dependent, which is not often a good thing.  But
       #                      sometimes you have to.
       def uses(klass, as: nil, initialize: :new_no_args)
-        uses_method_args = ActiveService::UsesMethodArgs.new(
+        uses_method_args = Uses::UsesMethodArgs.new(
           klass_being_used: klass,
           klass_with_uses: self,
           method_name_override: as,
           initializer_strategy: initialize,
-          active_service_config: ActiveService::Service.config
+          uses_config: Uses::Service.config
         )
 
-        name                         = ActiveService::MethodName.new(uses_method_args)
-        circular_dependency_analyzer = ActiveService::CircularDependency::Analyzer.new(uses_method_args)
-        initializer                  = ActiveService::Initializer.from_args(uses_method_args)
+        name                         = Uses::MethodName.new(uses_method_args)
+        circular_dependency_analyzer = Uses::CircularDependency::Analyzer.new(uses_method_args)
+        initializer                  = Uses::Initializer.from_args(uses_method_args)
 
         circular_dependency_analyzer.analyze!
 

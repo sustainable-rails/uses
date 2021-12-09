@@ -1,4 +1,4 @@
-module ActiveService
+module Uses
   class Error < StandardError
   end
 end

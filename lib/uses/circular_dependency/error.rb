@@ -1,7 +1,7 @@
 require_relative "../error"
-module ActiveService
+module Uses
   module CircularDependency
-    class Error < ActiveService::Error
+    class Error < Uses::Error
     end
   end
 end

@@ -1,10 +1,10 @@
 require "spec_helper"
-require "active_service/config"
+require "uses/config"
 
-RSpec.describe ActiveService::Config do
+RSpec.describe Uses::Config do
   describe "#on_circular_dependency" do
 
-    subject(:config) { ActiveService::Config.new }
+    subject(:config) { Uses::Config.new }
 
     it "allows :raise_error" do
       expect {

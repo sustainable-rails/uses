@@ -1,4 +1,4 @@
-module ActiveService
+module Uses
   # Convienience methods for test to inject mocks/doubles into a class under test.
   #
   # An advantage of "injecting" dependencies is that you can provide alternate implementations 
@@ -53,13 +53,13 @@ module ActiveService
 
     def subject_must_be_active_sevice!(subject)
       if !subject.class.respond_to?(:__active_service_dependent_classes)
-        raise ActiveService::Error, "#{subject.class} is not an ActiveService::Service, so you cannot inject a double into it"
+        raise Uses::Error, "#{subject.class} does not include Uses::Service, so you cannot inject a double into it"
       end
     end
 
     def injected_class_must_be_class!(klass)
       if !klass.kind_of?(Class)
-        raise ActiveService::Error, "Pass the actual class, not a #{klass.class}."
+        raise Uses::Error, "Pass the actual class, not a #{klass.class}."
       end
     end
 
@@ -67,7 +67,7 @@ module ActiveService
       name = subject.class.__active_service_dependent_classes[klass].to_s
 
       if name.blank?
-        raise ActiveService::Error, "#{subject.class} does not depend on a #{klass}, so there is no reason to inject a mock"
+        raise Uses::Error, "#{subject.class} does not depend on a #{klass}, so there is no reason to inject a mock"
       end
       name
     end

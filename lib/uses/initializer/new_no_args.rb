@@ -1,6 +1,6 @@
 require_relative "base_initializer"
 
-class ActiveService::Initializer::NewNoArgs < ActiveService::Initializer::BaseInitializer
+class Uses::Initializer::NewNoArgs < Uses::Initializer::BaseInitializer
   def create_proc(uses_method_args)
     initialize_method = uses_method_args.klass_being_used.instance_method(:initialize)
     if !initialize_method.arity.in?([0,-1])

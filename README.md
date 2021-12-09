@@ -1,6 +1,6 @@
-# active\_service - minimally manage your service layer
+# uses - declare dependencies between classes
 
-[![<sustainable-rails>](https://circleci.com/gh/sustainable-rails/active_service.svg?style=shield)](https://app.circleci.com/pipelines/github/sustainable-rails/active_service)
+[![<sustainable-rails>](https://circleci.com/gh/sustainable-rails/uses.svg?style=shield)](https://app.circleci.com/pipelines/github/sustainable-rails/uses)
 
 Your *service layer* is a web of classes that depend on each other to get the job done. While you can manage that directly with code and test them
 directly using mocks or integration tests, declaring dependencies directly can reduce errors, increase consistency, and make your code a bit
@@ -11,7 +11,7 @@ simpler.
 Add to your `Gemfile`
 
 ```ruby
-gem "active_service"
+gem "uses"
 ```
 
 ## Usage
@@ -67,7 +67,7 @@ private
 end
 ```
 
-This is fine, but with Active Service you can declare these dependencies explicitly:
+This is fine, but with Uses you can declare these dependencies explicitly:
 
 ```ruby
 class PaymentsController < ApplicationController
@@ -107,14 +107,14 @@ By declaring dependencies like this, you:
 
 ## Set Up
 
-Strictly speaking, to access `uses`, you should include `ActiveService::Service` into any class that needs it. Practically, this is what you should
+Strictly speaking, to access `uses`, you should include `Uses::Service` into any class that needs it. Practically, this is what you should
 do:
 
 * Add it to `ApplicationController`:
 
   ```ruby
   class ApplicationController < ActionController::Base
-    include ActiveService::Service
+    include Uses::Service
 
     # whatever else is in your ApplicationController
   end
@@ -123,12 +123,12 @@ do:
 
   ```ruby
   class ApplicationService
-    include ActiveService::Service
+    include Uses::Service
   end
   ```
 
   and have your service layer classes inherit from this
-* Add `ActiveService::Service` to any other base class where your service layer logic is initiated.
+* Add `Uses::Service` to any other base class where your service layer logic is initiated.
 
 ## Testing Support
 
@@ -211,15 +211,15 @@ end
 
 ## Set Up for Testing
 
-You need to `require("active_service/inject_double")` and then `include ActiveService::InjectDouble` to make `inject_rspec_double` and
+You need to `require("uses/inject_double")` and then `include Uses::InjectDouble` to make `inject_rspec_double` and
 `inject_double` available. Practically speaking, you should do this in your base test case or RSpec configuration:
 
 ```ruby
 # spec/spec_helper.rb
-require "active_service/inject_double"
+require "uses/inject_double"
 
 RSpec.configure do |config|
-  config.include ActiveService::InjectDouble
+  config.include Uses::InjectDouble
 
   # ... remainder of your configuration
 end
@@ -280,12 +280,11 @@ private :braintree
 Not all objects can be created with `.new`. Here are the possible values for `initialize:`
 
 * `:new_no_args` - This is the default and creates an instance by calling `new` without any args. This should be how most of the classes you create are initialized.
-* `:config_initializers` - This says that an instance has been pre-configured by a file in `config/initializers` that calls into Active Service's
-configuration API like so:
+* `:config_initializers` - This says that an instance has been pre-configured by a file in `config/initializers` that calls into Uses' configuration API like so:
 
   ```ruby
   # config/initializers/braintree.rb
-  ActiveService::Service.initializers do |initializers|
+  Uses::Service.initializers do |initializers|
     initializers[Braintree::Gateway] = ->(*) {
       Braintree::Gateway.new(
         :environment => :sandbox,
@@ -341,22 +340,22 @@ inject_double(«object_with_dependency»,
 
 This is useful if you need to control how the mocked instance is created or if you are not using RSpec.
 
-### `ActiveService.config`
+### `Uses.config`
 
 There is currently one configuration option.
 
 #### `:on_circular_dependency` option
 
-Because the proliferation of `uses` creates a structured representation of your service layer's dependencies, active service can check for circular
+Because the proliferation of `uses` creates a structured representation of your service layer's dependencies, Uses can check for circular
 dependencies.  The reason this is important is that your code's behavior can become confusing if a dependency depends on another class that depends
 on it.
 
-By default, if a circular dependency is detected, active service will emit a warning.  You can change this behavior by setting a config value,
-which you can do by creating `config/initializers/active_sevice.rb`:
+By default, if a circular dependency is detected, Uses will emit a warning.  You can change this behavior by setting a config value,
+which you can do by creating `config/initializers/uses.rb`:
 
 ```ruby
-# config/initializers/active_sevice.rb
-ActiveService.config do |config|
+# config/initializers/uses.rb
+Uses.config do |config|
   config.on_circular_dependency = # one of :warn, :ignore, or :raise_error
 end
 ```
@@ -365,5 +364,5 @@ Valid values are:
 
 * `:warn` - this is the default and will emit a warning if a circular dependency is found.
 * `:ignore` - this will log a warning a debug level, effectively squelching the message. Don't use this unless you are migrating a service layer that has a lot of circular dependencies.
-* `:raise_error` - this will raise an `ActiveService::CircularDependency::Error` when it encounters a circular dependency.
+* `:raise_error` - this will raise an `Uses::CircularDependency::Error` when it encounters a circular dependency.
 

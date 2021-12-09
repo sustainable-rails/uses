@@ -1,9 +1,9 @@
 require_relative "base_notifier"
-module ActiveService
+module Uses
   module CircularDependency
-    class LogNotifer < BaseNotifier
+    class IgnoreNotifier < BaseNotifier
       def notify!
-        Rails.logger.warn(@message)
+        Rails.logger.debug(@message)
       end
     end
   end
